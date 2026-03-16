@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VulnScan Pro — Scanner</title>
+<style>
+/* (styles same as original - omitted for brevity in this file) */
+:root{
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --muted: #6b7280;
+  --text: #0b1220;
+
+  --accent: #2563eb;        /* Blue */
+  --accent-2: #06b6d4;      /* Cyan */
+  --accent-3: #8b5cf6;      /* Purple */
+
+  --success: #16a34a;
+  --warning: #facc15;
+  --orange: #fb923c;
+  --danger: #ef4444;
+
+  --card-shadow: 0 10px 30px rgba(15,23,42,0.08);
+  --radius: 16px;
+}
+
+body.dark { --bg:#0b1220; --panel:#1c2433; --text:#e5e7eb; --muted:#9ca3af; --card-shadow:0 6px 18px rgba(0,0,0,0.4); }
+*{box-sizing:border-box}
+body{ margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+.app { display:flex; min-height:100vh; gap:24px; }
+.sidebar { width:260px; background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); border-right:1px solid rgba(0,0,0,0.04); padding:28px 18px; box-shadow:var(--card-shadow); background:transparent; display:flex; flex-direction:column; }
+.logo { width:44px; height:44px; border-radius:10px; background:linear-gradient(180deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; box-shadow: 0 6px 16px rgba(2,6,23,0.15); }
+.brand h1{ font-size:16px; margin:0; }
+.brand p{ margin:0; font-size:12px; color:var(--muted) }
+nav { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+.nav-btn { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; border:none; background:transparent; color:var(--text); cursor:pointer; text-align:left; font-size:15px; }
+.nav-btn.active { background: rgba(15,99,255,0.08); color:var(--accent); box-shadow: var(--card-shadow); }
+.Logout {
+  padding-top: 18px;
+}
+.Logout button{
+  background:#ef4444;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.Logout button:hover{
+  background:#dc2626;
+}
+.back-login-btn{
+  width:100%;
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-top:10px;
+}
+.back-login-btn:hover{
+  background:#1d4ed8;
+}
+/* Theme buttons – Logout-style */
+.theme-btn {
+  flex: 1;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Light mode button */
+.theme-btn.light {
+  background: #e5e7eb;   /* light gray */
+  color: #111827;        /* dark text */
+}
+.theme-btn.light:hover {
+  background: #d1d5db;
+}
+
+/* Dark mode button */
+.theme-btn.dark {
+  background: #0f172a;   /* dark slate */
+  color: #ffffff;
+}
+.theme-btn.dark:hover {
+  background: #020617;
+}
+.about-heading {
+  font-size:18px;
+  font-weight:600;
+  margin-top:22px;
+  margin-bottom:8px;
+}
+
+.about-text {
+  font-size:14.5px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:10px;
+}
+
+.about-list {
+  padding-left:18px;
+  margin-bottom:14px;
+}
+
+.about-list li {
+  font-size:14.5px;
+  line-height:1.6;
+  margin-bottom:6px;
+}
+
+.main { flex:1; padding:32px; display:flex; flex-direction:column; gap:22px; }
+.header-row { display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.page-title { margin:0; font-size:28px; }
+.subtitle { margin:0; color:var(--muted); font-size:14px; }
+.grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; align-items:start; }
+.card {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--card-shadow);
+  min-height: 110px;
+
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* keep this */
+.card h3 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* curved glow */
+.card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-2)
+  );
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* hover lift */
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+}
+
+.activity { margin-top:8px; display:flex; gap:18px; flex-direction:column; }
+.recent-card { background:var(--panel); padding:16px; border-radius:12px; box-shadow:var(--card-shadow); }
+
+.badge { display:inline-block; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; }
+.badge.safe { background:rgba(16,185,129,0.12); color:var(--success); border:1px solid rgba(16,185,129,0.14); }
+.badge.low { background:rgba(250,204,21,0.08); color:#b45309; border:1px solid rgba(250,204,21,0.06); }
+.badge.medium { background:rgba(249,115,22,0.06); color:#b45309; border:1px solid rgba(249,115,22,0.06); }
+.badge.high { background:rgba(239,68,68,0.07); color:var(--danger); border:1px solid rgba(239,68,68,0.06); }
+.history-list { background:var(--panel); padding:18px; border-radius:12px; box-shadow:var(--card-shadow); }
+
+.report-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin-top:12px; }
+.report-box {
+  background:var(--panel);
+  padding:18px;
+  border-radius:16px;
+  text-align:center;
+  box-shadow:var(--card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Same gradient circle effect like dashboard cards */
+.report-box::after{
+  content:'';
+  position:absolute;
+  right:-40px;
+  top:-40px;
+  width:120px;
+  height:120px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  opacity:0.10;
+  border-radius:50%;
+}
+
+/* Hover effect */
+.report-box:hover{
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(15,23,42,0.12);
+}
+
+.controls { display:flex; gap:10px; align-items:center; margin-bottom:12px; }
+.search { flex:1; display:flex; background:var(--panel); border-radius:10px; padding:10px; box-shadow:var(--card-shadow); }
+.search input{ border:0; outline:0; background:transparent; width:100%; color:var(--text); font-size:14px }
+.select { padding:10px 14px; border-radius:10px; border:1px solid rgba(0,0,0,0.04); background:var(--panel); color:var(--text); }
+
+
+.metric{
+  font-size:32px;
+  font-weight:800;
+  margin-top:8px;
+  color:var(--accent);
+}
+#metric-total{ color: var(--accent); }
+#metric-critical{ color: var(--danger); }
+#metric-safe{ color: var(--success); }
+/* ===============================
+   Recent Scan Card (Premium Style)
+================================ */
+
+.recent-item {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  border-left: 6px solid transparent;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* curved glow corner */
+.recent-item::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-2)
+  );
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* hover lift */
+.recent-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+}
+
+/* Severity border colors */
+.recent-item.safe { border-left-color: var(--success); }
+.recent-item.low { border-left-color: var(--warning); }
+.recent-item.medium { border-left-color: var(--orange); }
+.recent-item.high { border-left-color: var(--danger); }
+
+
+.recent-item:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 22px 45px rgba(15,23,42,0.14);
+}
+
+
+/* Left section */
+.recent-left{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.recent-icon{
+  font-size:22px;
+  margin-top:2px;
+}
+
+.recent-title{
+  font-weight:600;
+  font-size:15px;
+}
+
+.recent-target{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:2px;
+}
+
+.recent-time{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* Severity borders */
+.recent-item.safe{ border-left-color: var(--success); }
+.recent-item.low{ border-left-color: var(--warning); }
+.recent-item.medium{ border-left-color: var(--orange); }
+.recent-item.high{ border-left-color: var(--danger); }
+
+
+.card{
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(15,23,42,0.12);
+}
+
+.report-btn{
+  padding:12px 16px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,0.08);
+  background:var(--panel);
+  cursor:pointer;
+  font-weight:600;
+  transition: all 0.25s ease;
+}
+
+.report-btn:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(15,23,42,0.12);
+  background:var(--accent);
+  color:white;
+}
+
+.report-btn.primary{
+  background:var(--accent);
+  color:white;
+  border:none;
+}
+
+.report-btn.primary:hover{
+  background:#1d4ed8;
+}
+
+.report-btn-container{
+  margin-top:18px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+/* Settings cards */
+.settings-card {
+  background: var(--panel);
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* curved highlight */
+.settings-card::after {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  opacity: 0.10;
+  border-radius: 50%;
+}
+
+/* hover effect */
+.settings-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+/* Glow effect */
+.settings-card button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Hover glow */
+.settings-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+/* Blue glow (default) */
+.settings-card button:hover::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.35),
+    transparent 70%
+  );
+  z-index: -1;
+}
+
+/* Dark mode button glow */
+.theme-btn.dark:hover::after {
+  background: radial-gradient(
+    circle,
+    rgba(148, 163, 255, 0.35),
+    transparent 70%
+  );
+}
+
+/* ==============================
+   Scan Modules Card Hover
+================================ */
+.module-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* curved glow corner */
+.module-card::after {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  opacity: 0.10;
+  border-radius: 50%;
+}
+
+/* lift on hover */
+.module-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+}
+
+/* ==============================
+   Scan Modules Button Glow
+================================ */
+.module-card button {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.module-card button:hover {
+  transform: translateY(-2px);
+}
+
+/* glow */
+.module-card button:hover::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.45),
+    transparent 70%
+  );
+  z-index: -1;
+}
+
+/* ===============================
+   Logout & Back-to-Login Glow
+================================ */
+
+/* shared animation */
+.logout-btn,
+.back-login-btn {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* lift on hover */
+.logout-btn:hover,
+.back-login-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* 🔴 Logout red glow */
+.logout-btn:hover::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.45),
+    transparent 70%
+  );
+  z-index: -1;
+}
+.logout-btn {
+  width: 100%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* 🔵 Back to Login blue glow */
+.back-login-btn:hover::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.45),
+    transparent 70%
+  );
+  z-index: -1;
+}
+
+.nav-auth {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Remove default blue module glow */
+.module-card .scan-btn:hover::after {
+  background: none;
+}
+
+/* Blue */
+.module-card .scan-blue:hover::after {
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.45),
+    transparent 70%
+  );
+}
+
+/* Cyan */
+.module-card .scan-cyan:hover::after {
+  background: radial-gradient(
+    circle,
+    rgba(6, 182, 212, 0.45),
+    transparent 70%
+  );
+}
+
+/* Green */
+.module-card .scan-green:hover::after {
+  background: radial-gradient(
+    circle,
+    rgba(16, 185, 129, 0.45),
+    transparent 70%
+  );
+}
+
+/* Purple */
+.module-card .scan-purple:hover::after {
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.45),
+    transparent 70%
+  );
+}
+
+/* ===============================
+   Scan History Button Effects
+   =============================== */
+
+/* Disable default nav-btn blue glow */
+.nav-btn.history-download:hover,
+.nav-btn.history-delete:hover {
+  box-shadow: none !important;
+}
+
+/* -------- Download (GREEN) -------- */
+.nav-btn.history-download:hover {
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.65);
+  color: #10b981;
+  transform: translateY(-1px);
+}
+
+/* ---- Delete base ---- */
+.nav-btn.history-delete {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+  transition: transform 0.2s ease;
+}
+
+/* ---- Glow ring (hidden by default) ---- */
+.nav-btn.history-delete::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.6),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ---- Hover ---- */
+.nav-btn.history-delete:hover {
+  transform: scale(1.15);
+}
+
+.nav-btn.history-delete:hover::before {
+  opacity: 1;
+}
+
+/* ===============================
+   About Section Card Hover Effect
+================================ */
+
+.about-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* curved glow corner (same style as settings/modules) */
+.about-card::after {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-2)
+  );
+  opacity: 0.10;
+  border-radius: 50%;
+}
+
+/* hover lift */
+.about-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+}
+
+/* ===============================
+   Scan History Card Hover + Glow
+================================ */
+.history-item {
+  position: relative;
+  padding: 22px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  background: var(--panel);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Decorative curved background (like Settings card) */
+.history-item::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-2)
+  );
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* Hover lift */
+.history-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.14);
+}
+
+/* ===============================
+   Severity-based glow colors
+================================ */
+
+/* SAFE – Green */
+.history-item.safe::after {
+  background: radial-gradient(
+    circle,
+    rgba(16, 185, 129, 0.55),
+    transparent 70%
+  );
+}
+
+/* LOW – Yellow */
+.history-item.low::after {
+  background: radial-gradient(
+    circle,
+    rgba(250, 204, 21, 0.55),
+    transparent 70%
+  );
+}
+
+/* MEDIUM – Orange */
+.history-item.medium::after {
+  background: radial-gradient(
+    circle,
+    rgba(251, 146, 60, 0.55),
+    transparent 70%
+  );
+}
+
+/* HIGH – Red */
+.history-item.high::after {
+  background: radial-gradient(
+    circle,
+    rgba(239, 68, 68, 0.6),
+    transparent 70%
+  );
+}
+
+/* Sidebar full width on desktop */
+.sidebar {
+  width: 250px;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+/* When collapsed, sidebar becomes small */
+body.sidebar-collapsed .sidebar {
+  width: 70px;
+}
+.app {
+  display: flex;
+}
+
+/* Sidebar default width */
+.sidebar {
+  width: 250px;
+  transition: width 0.3s ease;
+}
+
+/* Collapse */
+body.sidebar-collapsed .sidebar {
+  width: 70px;
+}
+
+/* Main should just grow naturally */
+.main {
+  flex: 1;
+}
+
+/* ===================================== */
+/* DESKTOP COLLAPSE – CLEAN FIX         */
+/* ===================================== */
+
+/* Prevent overflow */
+.sidebar {
+  overflow: hidden;
+}
+
+/* Hide all sidebar text when collapsed */
+body.sidebar-collapsed .sidebar h1,
+body.sidebar-collapsed .sidebar p,
+body.sidebar-collapsed .sidebar span,
+body.sidebar-collapsed .sidebar button {
+  display: none;
+}
+
+/* Center remaining icons or items */
+body.sidebar-collapsed .sidebar a,
+body.sidebar-collapsed .sidebar .brand {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Optional: center logo */
+body.sidebar-collapsed .sidebar .logo {
+  margin: 0 auto;
+}
+
+/* Toggle button visible always (desktop + mobile) */
+.mobile-toggle {
+  font-size: 22px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: var(--panel);
+  cursor: pointer;
+}
+
+/*  MOBILE BEHAVIOR (Below 768px)  */
+@media (max-width: 768px) {
+
+  /* Sidebar hidden by default on mobile */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;           /* hidden outside screen */
+    width: 250px;
+    height: 100vh;
+    background: var(--panel);
+    z-index: 1000;
+  }
+
+  /* When opened, slide in */
+  body.sidebar-open .sidebar {
+    left: 0;
+  }
+
+  /* Main should not shift on mobile */
+  .main {
+    margin-left: 0 !important;
+  }
+
+  /* Dark overlay behind sidebar */
+  body.sidebar-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 999;
+  }
+}
+/*dashboard mobile card*/
+@media (max-width: 768px) {
+
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">VE</div>
+      <div>
+        <h1>VulnEye</h1>
+        <p>Security Scanner</p>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" data-section="overview" onclick="navigate(event)">Overview</button>
+      <button class="nav-btn" data-section="modules" onclick="navigate(event)">Scan Modules</button>
+      <button class="nav-btn" data-section="history" onclick="navigate(event)">Scan History</button>
+      <button class="nav-btn" data-section="reports" onclick="navigate(event)">Reports</button>
+      <button class="nav-btn" data-section="settings" onclick="navigate(event)">Settings</button>
+      <button class="nav-btn" data-section="about" onclick="navigate(event)">About</button>
+<div class="nav-auth">
+  <button onclick="logout()" class="logout-btn">LogOut</button>
+
+  <button onclick="window.location.href='index.html'" class="back-login-btn">
+    ⬅ Back to Login
+  </button>
+</div>
+    </nav>
+
+  </aside>
+
+  <main class="main">
+    <div class="header-row">
+<button id="mobileToggle" class="mobile-toggle">☰</button>
+
+      <div>
+        <h2 class="page-title" id="page-title">Dashboard Overview</h2>
+        <p class="subtitle" id="page-sub">Monitor your security scanning activity</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="stats-mini" style="display:flex;gap:8px;align-items:center"></div>
+      </div>
+    </div>
+
+    <section id="overview-section">
+      <div class="grid" style="align-items:stretch">
+        <div class="card metric-card">
+          <h3>Total Scans</h3>
+          <div class="metric" id="metric-total">0</div>
+          <p style="color:var(--muted);margin-top:8px;font-size:13px">All-time security scans</p>
+        </div>
+
+        <div class="card metric-card">
+          <h3>Critical Findings</h3>
+          <div class="metric" id="metric-critical">0</div>
+          <p style="color:var(--muted);margin-top:8px;font-size:13px">High/Critical severity issues</p>
+        </div>
+
+        <div class="card metric-card">
+          <h3>Safe Scans</h3>
+          <div class="metric" id="metric-safe">0</div>
+          <p style="color:var(--muted);margin-top:8px;font-size:13px">No vulnerabilities detected</p>
+        </div>
+      </div>
+<div class="grid" style="margin-top:18px">
+
+  <!-- Donut Chart -->
+  <div class="card">
+    <h3>Vulnerability by Severity</h3>
+    <canvas id="severityChart" height="180"></canvas>
+  </div>
+
+  <!-- Bar Chart -->
+  <div class="card">
+    <h3>Scans by Type</h3>
+    <canvas id="typeChart" height="180"></canvas>
+  </div>
+
+  <!-- Summary -->
+  <div class="card">
+    <h3>Security Summary</h3>
+    <p style="margin-top:10px;color:var(--muted)">
+      This system continuously analyzes URLs, images, documents, and videos
+      to detect potential threats and classify severity levels.
+    </p>
+    <ul style="margin-top:10px;color:var(--muted)">
+      <li>Real-time scan simulation</li>
+      <li>Severity classification</li>
+      <li>Report generation</li>
+    </ul>
+  </div>
+
+</div>
+
+      <div class="activity">
+        <div class="recent-card">
+          <h3 style="margin:0 0 8px 0">Recent Scan Activity</h3>
+          <p style="margin:0;color:var(--muted)">Your latest security scans</p>
+
+          <div style="margin-top:12px">
+            <div id="recent-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modules-section" style="display:none">
+      <div style="display:flex; gap:18px; flex-wrap:wrap">
+        <div class="card module-card" style="flex:1; min-width:300px">
+          <h3>URL Scanner</h3>
+          <p style="color:var(--muted)">Enter a website URL to perform a vulnerability simulation scan.</p>
+          <input type="text" id="module-url" placeholder="https://example.com" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin-top:12px" />
+          <button onclick="triggerModuleScan('URL')"
+  class="nav-btn scan-btn scan-blue"
+  style="margin-top:12px;width:140px;background:var(--accent);color:white;border-radius:8px">
+  Start Scan
+</button>
+
+          <p style="margin-top:10px;color:var(--muted)" id="status-url">Status: Not scanned</p>
+        </div>
+
+        <div class="card module-card" style="flex:1; min-width:300px">
+          <h3>Image Scanner</h3>
+          <p style="color:var(--muted)">Upload an image to check for embedded threats.</p>
+          <input type="file" id="module-image" accept="image/*" style="margin-top:12px" />
+          <button onclick="triggerModuleScan('Image')"
+  class="nav-btn scan-btn scan-cyan"
+  style="margin-top:12px;width:140px;background:#06b6d4;color:white;border-radius:8px">
+  Start Scan
+</button>
+
+          <p style="margin-top:10px;color:var(--muted)" id="status-image">Status: Not scanned</p>
+        </div>
+
+        <div class="card module-card" style="flex:1; min-width:300px">
+          <h3>Document Scanner</h3>
+          <p style="color:var(--muted)">Upload a document to check for macros and suspicious content.</p>
+          <input 
+  type="file" 
+  id="module-file"
+accept=".pdf,.doc,.docx,.docm,.xls,.xlsx,.xlsm,.ppt,.pptx,.txt,.rtf,.odt,.csv,.js,.bat,.vbs,.ps1,.sh,.exe,.msi"
+  style="margin-top:12px" />
+
+          <button onclick="triggerModuleScan('File')"
+  class="nav-btn scan-btn scan-green"
+  style="margin-top:12px;width:140px;background:#10b981;color:white;border-radius:8px">
+  Start Scan
+</button>
+
+          <p style="margin-top:10px;color:var(--muted)" id="status-file">Status: Not scanned</p>
+        </div>
+
+        <div class="card module-card" style="flex:1; min-width:300px">
+          <h3>Video Scanner</h3>
+          <p style="color:var(--muted)">Upload a video file to simulate analysis for suspicious content or metadata anomalies.</p>
+          <input type="file" id="module-video" accept="video/*" style="margin-top:12px" />
+          <button onclick="triggerModuleScan('Video')"
+  class="nav-btn scan-btn scan-purple"
+  style="margin-top:12px;width:140px;background:#8b5cf6;color:white;border-radius:8px">
+  Start Scan
+</button>
+
+          <p style="margin-top:10px;color:var(--muted)" id="status-video">Status: Not scanned</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="history-section" style="display:none">
+      <div style="margin-top:14px" class="controls">
+        <div class="search">
+          <input type="text" id="search-input" placeholder="Search scans..." oninput="renderHistory()" />
+        </div>
+
+        <select id="severity-filter" class="select" onchange="renderHistory()">
+          <option value="all">All Severities</option>
+          <option value="Safe">Safe</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+	<select id="type-filter" class="select" onchange="renderHistory()">
+ 	  <option value="all">All Types</option>
+ 	  <option value="URL Scanner">URL</option>
+ 	  <option value="Image Scanner">Image</option>
+	  <option value="Document Scanner">Document</option>
+	  <option value="Video Scanner">Video</option>
+	</select>
+
+      </div>
+
+      <div id="history-list" class="history-list" style="margin-top:12px"></div>
+    </section>
+
+    <section id="reports-section" style="display:none">
+      <div style="margin-top:16px" class="report-grid">
+        <div class="report-box">
+          <h4 style="margin:0">Total Scans</h4>
+          <div style="font-size:20px;font-weight:700;margin-top:6px" id="report-total">0</div>
+        </div>
+        <div class="report-box">
+          <h4 style="margin:0">Critical/High</h4>
+          <div style="font-size:20px;font-weight:700;margin-top:6px;color:var(--danger)" id="report-high">0</div>
+        </div>
+        <div class="report-box">
+          <h4 style="margin:0">Medium</h4>
+          <div style="font-size:20px;font-weight:700;margin-top:6px" id="report-medium">0</div>
+        </div>
+	<div class="report-box">
+ 	  <h4 style="margin:0">Low</h4>
+	  <div style="font-size:20px;font-weight:700;margin-top:6px" id="report-low">0</div>
+	</div>
+        <div class="report-box">
+          <h4 style="margin:0">Safe</h4>
+          <div style="font-size:20px;font-weight:700;margin-top:6px;color:var(--success)" id="report-safe">0</div>
+        </div>
+      </div>
+
+<div class="report-btn-container">
+  <button onclick="downloadReport('json')" class="report-btn">
+    JSON Format
+  </button>
+
+  <button onclick="downloadReport('csv')" class="report-btn">
+    CSV Format
+  </button>
+
+  <button onclick="downloadReport('text')" class="report-btn">
+    Text Format
+  </button>
+
+  <button onclick="downloadReport('pdf')" class="report-btn">
+    PDF Format
+  </button>
+
+  <button onclick="printAllScans()" class="report-btn primary">
+    Print Report
+  </button>
+</div>
+
+    </section>
+
+    <section id="settings-section" style="display:none">
+      <div style="margin-top:14px; display:flex; gap:18px; flex-direction:column; max-width:520px">
+        <div class="settings-card">
+          <h4 style="margin:0 0 8px 0">Theme</h4>
+          <p style="margin:0 0 12px 0;color:var(--muted)">Choose light or dark appearance</p>
+          <div style="display:flex; gap:12px;">
+  <button onclick="setTheme('light')" class="theme-btn light">
+    ☀ Light Mode
+  </button>
+  <button onclick="setTheme('dark')" class="theme-btn dark">
+    🌙 Dark Mode
+  </button>
+</div>
+    </div>
+        <div class="settings-card">
+          <h4 style="margin:0 0 8px 0">Account</h4>
+          <p style="margin:0 0 12px 0;color:var(--muted)">Update username / password</p>
+          <input id="acct-username" placeholder="New username" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin-bottom:8px" />
+          <input id="acct-pass" placeholder="New password" type="password"
+       style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)" />
+
+<label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:var(--muted);cursor:pointer;">
+  <input type="checkbox" onclick="toggleUpdatePassword()"> Show password
+</label>
+
+          <div style="margin-top:10px">
+            <button onclick="updateAccount()" class="nav-btn" style="background:var(--accent); color:white; border-radius:8px; padding:8px 12px">Update</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about-section" style="display:none; max-width:900px">
+  <div class="about-card" style="background:var(--panel); padding:20px; border-radius:12px; box-shadow:var(--card-shadow)">
+    <h2 style="font-size:26px; font-weight:700; margin-top:0;">
+      How to Use VulnEye – User Guide
+    </h2>
+
+    <p class="about-text">
+      VulnEye is a web-based vulnerability scanning dashboard designed to help users simulate
+      and track security scans on different types of inputs such as URLs, files, images, and videos.
+      This guide explains each section of the application and how to use it effectively.
+    </p>
+
+    <h3 class="about-heading">1. Login & Access</h3>
+    <ul class="about-list">
+      <li>Users must register or log in to access the scanner.</li>
+      <li>After successful login, the dashboard opens automatically.</li>
+      <li>Session is maintained using secure session storage.</li>
+    </ul>
+
+    <h3 class="about-heading">2. Dashboard Overview</h3>
+    <p class="about-text">The Overview page gives a quick summary of your scanning activity.</p>
+    <ul class="about-list">
+      <li><b>Total Scans</b> – Total number of scans performed.</li>
+      <li><b>Critical Findings</b> – Number of high-severity issues detected.</li>
+      <li><b>Safe Scans</b> – Scans where no vulnerabilities were found.</li>
+      <li><b>Recent Scan Activity</b> – Displays your latest scans with severity labels.</li>
+    </ul>
+    <p class="about-text">
+      <b>Purpose:</b> Helps users quickly understand their security status at a glance.
+    </p>
+
+    <h3 class="about-heading">3. Scan Modules</h3>
+    <p class="about-text">This section allows you to perform different types of scans.</p>
+    <ul class="about-list">
+      <li><b>URL Scanner</b> – Enter a website URL and click Start Scan.</li>
+      <li><b>Image Scanner</b> – Upload image files (PNG, JPG).</li>
+      <li><b>Document Scanner</b> – Upload PDF, DOC, or TXT files.</li>
+      <li><b>Video Scanner</b> – Upload video files for analysis.</li>
+    </ul>
+
+    <p class="about-text">Each scan result is automatically saved to the database.</p>
+
+    <h3 class="about-heading">4. Scan History</h3>
+    <ul class="about-list">
+      <li>View scan type, target, severity, and time.</li>
+      <li>Filter scans by severity or scan type.</li>
+      <li>Search scans using keywords.</li>
+      <li>Download individual scan results.</li>
+      <li>Permanently delete scans when needed.</li>
+    </ul>
+
+    <h3 class="about-heading">5. Reports</h3>
+    <ul class="about-list">
+      <li>Generate reports in JSON, CSV, Text, or PDF format.</li>
+      <li>Print all scans directly from the dashboard.</li>
+    </ul>
+
+    <h3 class="about-heading">6. Settings</h3>
+    <ul class="about-list">
+      <li><b>Theme Selection</b> – Switch between Light and Dark mode.</li>
+      <li><b>Account Update</b> – Change username or password securely.</li>
+    </ul>
+
+    <h3 class="about-heading">7. About Section</h3>
+    <p class="about-text">
+      The About section provides guidance and explains how to use every feature of VulnEye.
+      It helps first-time users understand the workflow and functionality of the system.
+    </p>
+
+    <h3 class="about-heading">8. Logout & Security</h3>
+    <ul class="about-list">
+      <li>Use the Logout button to securely end your session.</li>
+      <li>Session data is cleared and the user is redirected to the login page.</li>
+    </ul>
+
+    <p class="about-text">
+      Summary: VulnEye offers a simple, structured interface to simulate vulnerability scanning,
+      manage scan records, and generate reports.</p>
+
+  </div>
+</section>
+
+
+    <div id="print-area" style="display:none"></div>
+  </main>
+</div>
+
+<script>
+const API_BASE = "http://localhost:5000";
+
+/* Chart instances (global) */
+let severityChartInstance = null;
+let typeChartInstance = null;
+
+/* -------------------------
+   Persistence & App State
+   (sessionStorage used for login state only)
+-------------------------*/
+let historyData = []; // loaded from backend
+
+function setTheme(mode){
+  if(mode === 'dark'){
+    document.body.classList.add('dark');
+    sessionStorage.setItem('theme','dark');
+  } else {
+    document.body.classList.remove('dark');
+    sessionStorage.setItem('theme','light');
+  }
+}
+if(sessionStorage.getItem('theme') === 'dark'){
+  document.body.classList.add('dark');
+}
+
+/* Login check */
+if(sessionStorage.getItem('loggedIn') !== 'true'){
+  alert('You must log in first!');
+  window.location.href = 'index.html';
+}
+
+/* Navigation */
+function navigate(e){
+  const btn = e.currentTarget;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const target = btn.getAttribute('data-section');
+  setSection(target);
+}
+
+function setSection(section){
+  document.querySelectorAll('main section').forEach(s => s.style.display = 'none');
+  if(section === 'overview') document.getElementById('overview-section').style.display = 'block';
+  if(section === 'modules') document.getElementById('modules-section').style.display = 'block';
+  if(section === 'history') document.getElementById('history-section').style.display = 'block';
+  if(section === 'reports') document.getElementById('reports-section').style.display = 'block';
+  if(section === 'settings') document.getElementById('settings-section').style.display = 'block';
+  if(section === 'about') document.getElementById('about-section').style.display = 'block';
+
+  const map = {
+    overview: ['Dashboard Overview','Monitor your security scanning activity'],
+    modules: ['Scan Modules','Run URL, Image or Document scans'],
+    history: ['Scan History','View and manage your past security scans'],
+    reports: ['Reports','Generate and download security scan reports'],
+    settings: ['Settings','Customize your preferences'],
+    about: ['About','Learn how to use every feature step-by-step']
+  };
+  if(map[section]){
+    document.getElementById('page-title').innerText = map[section][0];
+    document.getElementById('page-sub').innerText = map[section][1];
+  }
+  renderMetrics();
+  renderHistory();
+  renderRecent();
+  renderReports();
+}
+
+/* ===============================
+   SIMPLE SCAN LOGIC (DEMO VERSION)
+================================ */
+
+/* ---------- URL SCAN ---------- */
+function scanURL(url){
+
+  const lower = url.toLowerCase();
+
+  if(lower.includes("free") || lower.includes("win") || lower.includes("prize")){
+    return "High";
+  }
+
+  if(lower.includes("bank") || lower.includes("secure") || lower.includes("account")){
+    return "Medium";
+  }
+
+  if(lower.includes("login") || lower.includes("verify") || lower.includes("update")){
+    return "Low";
+  }
+
+  if(!url.startsWith("https://")){
+    return "Low";
+  }
+
+  return "Safe";
+}
+
+
+/* ---------- IMAGE SCAN ---------- */
+function scanImage(file){
+
+  let score = 0;
+  const name = file.name.toLowerCase();
+
+  // real file type check
+  if(!file.type.startsWith("image/")){
+    score += 4;
+  }
+
+  // double extension attack
+  if(name.match(/\.(jpg|png|gif)\.exe/)){
+    score += 5;
+  }
+
+  // suspicious keywords
+  if(name.includes("virus") || name.includes("malware")){
+    score += 2;
+  }
+
+  if(score >= 5) return "High";
+  if(score >= 3) return "Medium";
+  if(score >= 1) return "Low";
+
+  return "Safe";
+}
+
+
+/* ---------- DOCUMENT SCAN ---------- */
+function scanDocument(file){
+
+  let score = 0;
+  const name = file.name.toLowerCase();
+
+  if(name.endsWith(".exe")){
+    score += 5;
+  }
+
+  if(name.match(/\.(pdf|docx)\.exe/)){
+    score += 5;
+  }
+
+  if(!file.type.includes("pdf") && !file.type.includes("word")){
+    score += 2;
+  }
+
+  if(score >= 5) return "High";
+  if(score >= 3) return "Medium";
+  if(score >= 1) return "Low";
+
+  return "Safe";
+}
+
+/* ---------- VIDEO SCAN ---------- */
+function scanVideo(file){
+
+  let score = 0;
+  const name = file.name.toLowerCase();
+
+  if(!file.type.startsWith("video/")){
+    score += 4;
+  }
+
+  if(name.match(/\.(mp4|avi|mkv)\.exe/)){
+    score += 5;
+  }
+
+  if(name.includes("crack") || name.includes("hack")){
+    score += 2;
+  }
+
+  if(score >= 5) return "High";
+  if(score >= 3) return "Medium";
+  if(score >= 1) return "Low";
+
+  return "Safe";
+}
+
+/* Create a scan record by sending to backend */
+async function createScanRecord({target, type}){
+  const payload = {
+  userId: sessionStorage.getItem('userId'),
+  username: sessionStorage.getItem('username'),
+  target,
+  type,
+  timestamp: new Date().toISOString()
+};
+  let endpoint = "";
+  if(type === "URL Scanner") endpoint = "/scan/url";
+  if(type === "Image Scanner") endpoint = "/scan/image";
+  if(type === "Document Scanner") endpoint = "/scan/document";
+  if(type === "Video Scanner") endpoint = "/scan/video";
+  try {
+    await fetch(API_BASE + endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    await loadHistoryFromDB();
+    return payload;
+  } catch (err) {
+    console.error(err);
+    alert('Failed to save scan to server: ' + err.message);
+  }
+}
+
+/* Scan module logic*/
+const resetTimers = {};
+
+function autoResetStatus(id){
+  if(resetTimers[id]) clearTimeout(resetTimers[id]);
+
+  resetTimers[id] = setTimeout(() => {
+    const el = document.getElementById(id);
+    if(el && el.innerText === 'Scanning...'){
+      el.innerText = 'Status: Not scanned';
+    }
+  }, 3000);
+}
+
+
+function triggerModuleScan(kind){
+// 🔁 RESET STATUS WHEN NEW SCAN STARTS
+if(kind === 'URL'){
+  document.getElementById('status-url').innerText = 'Scanning...';
+  autoResetStatus('status-url');
+}
+
+if(kind === 'Image'){
+  document.getElementById('status-image').innerText = 'Scanning...';
+  autoResetStatus('status-image');
+}
+
+if(kind === 'File'){
+  document.getElementById('status-file').innerText = 'Scanning...';
+  autoResetStatus('status-file');
+}
+
+if(kind === 'Video'){
+  document.getElementById('status-video').innerText = 'Scanning...';
+  autoResetStatus('status-video');
+}
+
+if(kind === 'URL'){
+
+let url = document.getElementById('module-url').value.trim();
+
+if(!url){
+  alert('Please enter a URL');
+  return;
+}
+
+// basic validation (before adding https)
+if(url.includes(" ")){
+  alert("Invalid URL");
+  document.getElementById('status-url').innerText = 'Status: Not scanned';
+  return;
+}
+
+// add https automatically
+if(!url.startsWith("http://") && !url.startsWith("https://")){
+  url = "https://" + url;
+}
+
+  fetch(API_BASE + "/scan/url", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: sessionStorage.getItem("userId"),
+      username: sessionStorage.getItem("username"),
+      target: url,
+      type: "URL Scanner"
+    })
+  })
+.then(async res => {
+
+  const data = await res.json();
+
+if(!res.ok){
+  alert(data.error || "Scan failed");
+  document.getElementById('status-url').innerText = 'Status: Not scanned';
+  return;
+}
+  // ✅ SUCCESS
+clearTimeout(resetTimers['status-url']);
+document.getElementById('status-url').innerText = `Last: ${data.severity}`;
+    showToast(`URL scanned — ${data.severity}`);
+    document.getElementById('module-url').value = '';
+
+  })
+  .catch(() => {
+    alert("Server error");
+  // ✅ RESET STATUS ON SERVER FAILURE
+  document.getElementById('status-url').innerText = 'Status: Not scanned';
+  });
+
+  return;
+}
+
+
+  const imageTypes = ['image/png','image/jpeg','image/jpg','image/gif','image/webp'];
+  const documentTypes = ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+  const videoTypes = ['video/mp4','video/mpeg','video/ogg','video/webm','video/avi','video/x-matroska'];
+
+  if(kind === 'Image'){
+    const f = document.getElementById('module-image').files[0];
+    if(!f){
+  alert('Please select an image');
+  document.getElementById('status-image').innerText = 'Status: Not scanned';
+  return;
+}
+
+if(!imageTypes.includes(f.type)){
+  alert('Invalid file!');
+  document.getElementById('status-image').innerText = 'Status: Not scanned';
+  return;
+}
+
+    fetch(API_BASE + "/scan/image", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    userId: sessionStorage.getItem("userId"),
+    username: sessionStorage.getItem("username"),
+    target: f.name,
+    type: "Image Scanner"
+  })
+})
+.then(res => res.json())
+.then(data => {
+
+  clearTimeout(resetTimers['status-image']);
+
+  document.getElementById('status-image').innerText = `Last: ${data.severity}`;
+  showToast(`Image scanned — ${data.severity}`);
+
+  document.getElementById('module-image').value = '';
+
+  loadHistoryFromDB();
+})
+.catch(() => {
+  alert("Server error");
+  document.getElementById('status-image').innerText = 'Status: Not scanned';
+});
+
+return;
+  }
+
+  if(kind === 'File'){
+    const f = document.getElementById('module-file').files[0];
+    if(!f){
+  alert('Please select a document');
+  document.getElementById('status-file').innerText = 'Status: Not scanned';
+  return;
+}
+
+if(!documentTypes.includes(f.type)){
+  alert('Invalid file!');
+  document.getElementById('status-file').innerText = 'Status: Not scanned';
+  return;
+}
+
+fetch(API_BASE + "/scan/document", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    userId: sessionStorage.getItem("userId"),
+    username: sessionStorage.getItem("username"),
+    target: f.name,
+    type: "Document Scanner"
+  })
+})
+.then(res => res.json())
+.then(data => {
+
+  clearTimeout(resetTimers['status-file']);
+
+  document.getElementById('status-file').innerText = `Last: ${data.severity}`;
+  showToast(`Document scanned — ${data.severity}`);
+
+  document.getElementById('module-file').value = '';
+
+  loadHistoryFromDB();
+
+})
+.catch(() => {
+  alert("Server error");
+  document.getElementById('status-file').innerText = 'Status: Not scanned';
+});
+
+return;
+  }
+
+  if(kind === 'Video'){
+    const f = document.getElementById('module-video').files[0];
+    if(!f){
+  alert('Please select a video');
+  document.getElementById('status-video').innerText = 'Status: Not scanned';
+  return;
+}
+
+if(!videoTypes.includes(f.type)){
+  alert('Invalid file!');
+  document.getElementById('status-video').innerText = 'Status: Not scanned';
+  return;
+}
+
+fetch(API_BASE + "/scan/video", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    userId: sessionStorage.getItem("userId"),
+    username: sessionStorage.getItem("username"),
+    target: f.name,
+    type: "Video Scanner"
+  })
+})
+.then(res => res.json())
+.then(data => {
+
+  clearTimeout(resetTimers['status-video']);
+
+  document.getElementById('status-video').innerText = `Last: ${data.severity}`;
+  showToast(`Video scanned — ${data.severity}`);
+
+  document.getElementById('module-video').value = '';
+
+  loadHistoryFromDB();
+
+})
+.catch(() => {
+  alert("Server error");
+  document.getElementById('status-video').innerText = 'Status: Not scanned';
+});
+
+return;
+  }
+}
+
+/* -------------------------
+   Load history from backend
+-------------------------*/
+async function loadHistoryFromDB(){
+  try {
+    const res = await fetch(API_BASE + "/scan/all?userId=" + sessionStorage.getItem("userId"));
+    const data = await res.json();
+
+    historyData = data.map((r, idx) => ({
+      id: r._id || ('scan' + idx),
+      target: r.target || r.url || r.fileName || "N/A",
+      type: r.type || detectType(r),
+      severity: r.severity || "Safe",
+      timestamp: r.timestamp || r.createdAt || new Date().toISOString()
+    }));
+
+    renderMetrics();
+    renderHistory();
+    renderRecent();
+    renderReports();
+    renderCharts();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load history from server");
+  }
+}
+
+function detectType(r){
+  if(r.url) return "URL Scanner";
+  if(r.imageName) return "Image Scanner";
+  if(r.videoName) return "Video Scanner";
+  if(r.fileName) return "Document Scanner";
+  return "Unknown";
+}
+
+
+/* UI rendering helpers (same as original) */
+function severityBadge(sev){
+  if(sev === 'Safe') return `<span class="badge safe">SAFE</span>`;
+  if(sev === 'Low') return `<span class="badge low">LOW</span>`;
+  if(sev === 'Medium') return `<span class="badge medium">MEDIUM</span>`;
+  return `<span class="badge high">HIGH</span>`;
+}
+
+function renderMetrics(){
+  const total = historyData.length;
+  const critical = historyData.filter(r => r.severity === 'High').length;
+  const safe = historyData.filter(r => r.severity === 'Safe').length;
+  document.getElementById('metric-total').innerText = total;
+  document.getElementById('metric-critical').innerText = critical;
+  document.getElementById('metric-safe').innerText = safe;
+
+  const stats = document.getElementById('stats-mini');
+  stats.innerHTML = `<div style="background:var(--panel);padding:10px;border-radius:10px;box-shadow:var(--card-shadow)">Scans: <strong>${total}</strong></div>`;
+}
+
+function formatTimestamp(iso){
+  return new Date(iso).toLocaleString();
+}
+
+function renderRecent(){
+  const container = document.getElementById('recent-list');
+  const recent = historyData.slice(0,3);
+
+  if(recent.length === 0){
+    container.innerHTML = `<div style="padding:12px;color:var(--muted)">No recent scans</div>`;
+    return;
+  }
+
+  container.innerHTML = recent.map(r => {
+    const iconMap = {
+      "URL Scanner": "🌐",
+      "Document Scanner": "📄",
+      "Image Scanner": "🖼️",
+      "Video Scanner": "🎥"
+    };
+
+    return `
+      <div class="recent-item ${r.severity.toLowerCase()}">
+        <div class="recent-left">
+          <div class="recent-icon">
+            ${iconMap[r.type] || "🛡️"}
+          </div>
+
+          <div>
+            <div class="recent-title">
+              ${r.type}
+              <span style="color:var(--muted);font-weight:500">
+                &nbsp;${r.target}
+              </span>
+            </div>
+
+            <div class="recent-time">
+              ${formatTimestamp(r.timestamp)}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          ${severityBadge(r.severity)}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHistory(){
+  const list = document.getElementById('history-list');
+  const searchEl = document.getElementById('search-input');
+  const severityEl = document.getElementById('severity-filter');
+  const typeEl = document.getElementById('type-filter');
+
+  const search = (searchEl && searchEl.value) ? searchEl.value.toLowerCase() : '';
+  const severity = (severityEl && severityEl.value) ? severityEl.value : 'all';
+  const typeFilter = (typeEl && typeEl.value) ? typeEl.value : 'all';
+
+  const filtered = historyData.filter(r => {
+    if(typeFilter !== 'all' && r.type !== typeFilter) return false;
+    if(severity !== 'all' && r.severity !== severity) return false;
+    if (
+  search &&
+  !(
+    ((r.target || '').toLowerCase().includes(search)) ||
+    ((r.type || '').toLowerCase().includes(search)) ||
+    ((r.id || '').toString().includes(search))
+  )
+) return false;
+
+    return true;
+  });
+
+  if(filtered.length === 0){
+    list.innerHTML = '<div style="padding:18px;color:var(--muted)">No scans found.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => `
+    <div class="history-item ${r.severity.toLowerCase()}">
+      <div style="flex:1">
+        <h4>${r.type} &nbsp; <span style="color:var(--muted);font-weight:600">${r.target}</span></h4>
+        <p>${formatTimestamp(r.timestamp)}</p>
+        <p style="margin-top:8px;color:var(--muted)">
+  ${
+    ((r.type || '').includes('Video'))
+      ? 'Video appears'
+      : ((r.type || '').includes('Image'))
+        ? 'Image appears'
+        : 'Document appears'
+  }
+  ${r.severity === 'Safe' ? 'safe' : 'to have issues'}
+</p>
+
+        <ul style="margin:8px 0 0 18px; color:var(--muted)">
+          ${r.severity === 'Safe' ? '<li>No issues detected</li><li>Standard format</li>' : `<li>Severity: ${r.severity}</li>`}
+        </ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <div>${severityBadge(r.severity)}</div>
+        <div style="display:flex;gap:8px">
+          <button
+  onclick="downloadSingle('${r.id}')"
+  class="nav-btn history-download"
+  style="padding:8px;border-radius:8px"
+>
+  Download
+</button>
+
+<button
+  onclick="deleteScan('${r.id}')"
+  class="nav-btn history-delete"
+>
+  🗑
+</button>
+
+
+
+
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCharts(){
+  if(!document.getElementById('severityChart')) return;
+
+  const counts = {
+    Safe: historyData.filter(r=>r.severity==='Safe').length,
+    Low: historyData.filter(r=>r.severity==='Low').length,
+    Medium: historyData.filter(r=>r.severity==='Medium').length,
+    High: historyData.filter(r=>r.severity==='High').length
+  };
+
+  // ---------- COUNT SCANS BY TYPE ----------
+  const typeCounts = {
+    "Video Scanner": historyData.filter(r => r.type === "Video Scanner").length,
+    "URL Scanner": historyData.filter(r => r.type === "URL Scanner").length,
+    "Document Scanner": historyData.filter(r => r.type === "Document Scanner").length,
+    "Image Scanner": historyData.filter(r => r.type === "Image Scanner").length
+  };
+
+  // 🔴 Destroy old charts first
+  if(severityChartInstance) severityChartInstance.destroy();
+  if(typeChartInstance) typeChartInstance.destroy();
+
+  // Donut Chart
+  severityChartInstance = new Chart(
+    document.getElementById('severityChart'),
+    {
+      type: 'doughnut',
+      data: {
+        labels: ['Safe','Low','Medium','High'],
+        datasets: [{
+          data: Object.values(counts),
+          backgroundColor: [
+            '#22c55e',
+            '#facc15',
+            '#fb923c',
+            '#ef4444'
+          ]
+        }]
+      },
+      options: {
+        plugins:{ legend:{ position:'bottom' } }
+      }
+    }
+  );
+
+  // Bar Chart — Scans by Type (COLORED)
+  const typeLabels = Object.keys(typeCounts);
+  const typeValues = Object.values(typeCounts);
+
+  const barColors = {
+  "Video Scanner": "#4F46E5",     // Blue
+  "URL Scanner": "#0284C7",       // Dark Sky Blue
+  "Document Scanner": "#14B8A6",  // Teal (NOT safe green)
+  "Image Scanner": "#A855F7"      // Purple
+};
+
+
+  typeChartInstance = new Chart(
+    document.getElementById('typeChart'),
+    {
+      type: 'bar',
+      data: {
+        labels: typeLabels,
+        datasets: [{
+          data: typeValues,
+          backgroundColor: typeLabels.map(l => barColors[l]),
+          borderRadius: 10,
+          barThickness: 38
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            ticks: {
+              color: typeLabels.map(l => barColors[l]),
+              font: { size: 12, weight: "600" }
+            },
+            grid: { display: false }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { color: "#6B7280" },
+            grid: { color: "#E5E7EB" }
+          }
+        }
+      }
+    }
+  );
+}
+
+
+/* Reports & Export */
+function renderReports(){
+  document.getElementById('report-total').innerText = historyData.length;
+  document.getElementById('report-high').innerText = historyData.filter(r => r.severity === 'High').length;
+  document.getElementById('report-medium').innerText = historyData.filter(r => r.severity === 'Medium').length;
+  document.getElementById('report-low').innerText = historyData.filter(r => r.severity === 'Low').length;
+  document.getElementById('report-safe').innerText = historyData.filter(r => r.severity === 'Safe').length;
+}
+
+function downloadBlob(filename, content, mime){
+  const blob = new Blob([content], { type: mime || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function downloadReport(format){
+  if(historyData.length === 0){ alert('No scans to export'); return; }
+
+  if(format === 'json'){
+    downloadBlob('vulnscan_report.json', JSON.stringify(historyData, null, 2), 'application/json');
+    // Save report to server
+    fetch(API_BASE + "/report", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history: historyData, generatedAt: new Date().toISOString() })
+    }).catch(e=>console.warn('report save failed', e));
+    return;
+  }
+  if(format === 'csv'){
+    const rows = [['id','target','type','severity','timestamp']];
+    historyData.forEach(r => rows.push([r.id, `"${(r.target+'').replace(/"/g,'""')}"`, r.type, r.severity, r.timestamp]));
+    const csv = rows.map(r => r.join(',')).join('\n');
+    downloadBlob('vulnscan_report.csv', csv, 'text/csv');
+    return;
+  }
+  if(format === 'text'){
+    const txt = historyData.map(r => `ID: ${r.id}\nTarget: ${r.target}\nType: ${r.type}\nSeverity: ${r.severity}\nTime: ${formatTimestamp(r.timestamp)}\n\n---\n`).join('\n');
+    downloadBlob('vulnscan_report.txt', txt, 'text/plain');
+    return;
+  }
+
+  if(format === 'pdf'){
+    generatePDF();
+    return;
+  }
+}
+
+function downloadSingle(id){
+  const rec = historyData.find(r => r.id === id);
+  if(!rec) return alert('Record not found');
+
+  const json = JSON.stringify(rec, null, 2);
+  downloadBlob(`scan_${rec.id}.json`, json, 'application/json');
+}
+
+
+function printAllScans(){
+  if(historyData.length === 0){
+    alert("No scans to print");
+    return;
+  }
+
+  let html = `
+    <h1>VulnEye – Full Scan History</h1>
+    <p>Generated: ${new Date().toLocaleString()}</p>
+    <hr><br>
+  `;
+
+  historyData.forEach((r, i) => {
+    html += `
+      <strong>Scan ${i + 1}</strong><br>
+      ID: ${r.id}<br>
+      Target: ${r.target}<br>
+      Type: ${r.type}<br>
+      Severity: ${r.severity}<br>
+      Time: ${formatTimestamp(r.timestamp)}<br>
+      <hr><br>
+    `;
+  });
+
+  const w = window.open("", "_blank");
+  w.document.write(`<html><body>${html}</body></html>`);
+  w.document.close();
+  w.print();
+}
+
+/*code function clicked pdf format to download history*/
+function generatePDF(){
+  if(historyData.length === 0){
+    alert("No scans to export");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  let y = 20;
+
+  pdf.setFontSize(16);
+  pdf.text("VulnEye - Full Scan History Report", 14, y);
+  y += 10;
+
+  pdf.setFontSize(10);
+  pdf.text("Generated: " + new Date().toLocaleString(), 14, y);
+  y += 10;
+
+  historyData.forEach((r, i) => {
+    if(y > 270){
+      pdf.addPage();
+      y = 20;
+    }
+
+    pdf.setFontSize(12);
+    pdf.text(`Scan ${i + 1}`, 14, y); 
+    y += 6;
+
+    pdf.setFontSize(10);
+    pdf.text(`ID: ${r.id}`, 14, y); y += 5;
+    pdf.text(`Target: ${r.target}`, 14, y); y += 5;
+    pdf.text(`Type: ${r.type}`, 14, y); y += 5;
+    pdf.text(`Severity: ${r.severity}`, 14, y); y += 5;
+    pdf.text(`Time: ${formatTimestamp(r.timestamp)}`, 14, y); 
+    y += 8;
+  });
+
+  pdf.save("vulnscan_full_report.pdf");
+}
+
+
+/* Manage history: deleteScan deletes the scan permanently.
+   It removes the record from the backend (MongoDB) first,
+   and if successful, updates the UI immediately without reload. */
+async function deleteScan(id){
+  if(!confirm("Delete this scan permanently?")) return;
+
+  try{
+    const res = await fetch("http://localhost:5000/scan/delete/" + id, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+
+    if(data.success){
+      // remove from UI
+      historyData = historyData.filter(r => r.id !== id);
+      renderHistory();
+      renderMetrics();
+      renderReports();
+      renderRecent();
+    }else{
+      alert("Delete failed on server");
+    }
+  }catch(err){
+    alert("Server error while deleting");
+  }
+}
+
+
+/* Account update */
+async function updateAccount(){
+  const newUsername = document.getElementById('acct-username').value.trim();
+  const newPassword = document.getElementById('acct-pass').value.trim();
+
+  if (!newUsername && !newPassword) {
+    alert("Enter a new username or password");
+    return;
+  }
+
+  const userId = sessionStorage.getItem("userId");
+
+  try {
+    const res = await fetch(`http://localhost:5000/user/update/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: newUsername || undefined,
+        password: newPassword || undefined
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      sessionStorage.setItem("username", data.user.username);
+      alert("Account updated successfully");
+      document.getElementById('acct-username').value = '';
+      document.getElementById('acct-pass').value = '';
+    } else {
+      alert(data.message || "Update failed");
+    }
+
+  } catch (err) {
+    alert("Server error while updating account");
+  }
+}
+
+function toggleUpdatePassword(){
+  const passInput = document.getElementById("acct-pass");
+  passInput.type = passInput.type === "password" ? "text" : "password";
+}
+
+
+/* Logout */
+function Logout(){
+  sessionStorage.removeItem('loggedIn');
+  alert('Logged out');
+  window.location.href = 'index.html';
+}
+
+function showToast(msg){
+  console.log('toast:', msg);
+}
+
+function logout() {
+    if (confirm("Do you want to logout?")) {
+        sessionStorage.clear();
+        alert("Logged out successfully!");
+        window.location.href = "index.html";
+    }
+}
+
+/* Toggle mobile sidebar */
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("mobileToggle");
+  const sidebar = document.getElementById("sidebar");
+
+  if (!toggle || !sidebar) return;
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    if (window.innerWidth <= 768) {
+      // MOBILE MODE
+      document.body.classList.toggle("sidebar-open");
+      toggle.innerText =
+        document.body.classList.contains("sidebar-open") ? "✖" : "☰";
+    } else {
+      // DESKTOP MODE
+      document.body.classList.toggle("sidebar-collapsed");
+    }
+  });
+
+  // Close on outside click (mobile only)
+  document.addEventListener("click", (e) => {
+    if (
+      window.innerWidth <= 768 &&
+      document.body.classList.contains("sidebar-open") &&
+      !sidebar.contains(e.target) &&
+      !toggle.contains(e.target)
+    ) {
+      document.body.classList.remove("sidebar-open");
+      toggle.innerText = "☰";
+    }
+  });
+});
+
+
+
+
+/* Init */
+loadHistoryFromDB();
+renderMetrics();
+renderRecent();
+renderHistory();
+renderReports();
+renderCharts();
+setSection('overview');
+document.addEventListener("DOMContentLoaded", loadHistoryFromDB);
+</script>
+</body>
+</html>

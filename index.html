@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Vulnerability Scanner - Login & Register</title>
+<style>
+
+/* (same styles omitted for brevity — kept identical to your original) */
+body {font-family: Arial, sans-serif; background:#eef2f3; margin:0; padding:0;}
+header {background:#00bcd4; color:white; padding:20px; text-align:center; position:relative;}
+header .logout-btn {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+
+  background: #ef4444 !important;
+  color: white !important;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+  transition: all 0.3s ease;
+}
+
+
+/* Hover = premium glow */
+header .logout-btn:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 25px rgba(0,0,0,0.25),
+    0 0 25px rgba(239, 68, 68, 1),
+    0 0 45px rgba(239, 68, 68, 0.9);
+}
+
+.container {width:90%; max-width:500px; margin:30px auto; background:white; padding:30px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+/* ===== Modern Login/Register Toggle ===== */
+.tab-buttons {
+  display: flex;
+  background: #e5e7eb;
+  border-radius: 50px;
+  padding: 6px;
+  margin-bottom: 30px;
+}
+
+.tab-buttons button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 0;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #374151;
+}
+
+.tab-buttons button.active {
+  background: #00bcd4;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0, 188, 212, 0.35);
+}
+
+form {display:none;}
+form.active {display:block;}
+input[type="text"], input[type="password"], input[type="email"] {width:95%; padding:10px; margin-top:10px; margin-bottom:5px; border:1px solid #ccc; border-radius:5px;}
+.show-pass {margin-bottom:10px; cursor:pointer;}
+.continue {text-align:center; margin-top:20px;}
+/* ===============================
+   Continue to Scanner Button
+================================ */
+.continue a {
+  display: inline-block;
+  position: relative;
+  padding: 12px 25px;
+  background: #007BFF;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+
+.continue a:hover {
+  transform: translateY(-3px);
+}
+
+.continue a::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(0, 123, 255, 0.55),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.continue a:hover::after {
+  opacity: 1;
+}
+
+/* ===============================
+   Login / Register Card Style
+================================ */
+form {
+  position: relative;
+  background: var(--panel);
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* curved glow corner */
+form::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-2)
+  );
+  opacity: 0.10;
+  pointer-events: none;
+}
+
+/* hover lift */
+form:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.15);
+}
+
+/* ===============================
+   Submit Button Glow
+================================ */
+/* ===== Premium Action Buttons ===== */
+.submit-btn {
+  background: linear-gradient(135deg, #00bcd4, #0097a7);
+  color: white;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0, 188, 212, 0.25);
+}
+
+/* Hover */
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 188, 212, 0.45);
+}
+
+/* Click */
+.submit-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 5px 12px rgba(0, 188, 212, 0.3);
+}
+
+/* ===============================
+   Continue to Scanner Glow
+================================ */
+.continue-btn {
+  display: inline-block;
+  position: relative;
+  background: var(--accent);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+
+.continue-btn:hover {
+  transform: translateY(-3px);
+}
+
+.continue-btn::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.55),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.continue-btn:hover::after {
+  opacity: 1;
+}
+
+
+</style>
+</head>
+<body>
+<header>
+<h1>Vulnerability Scanner</h1>
+<button class="logout-btn" id="logoutBtn" onclick="logout()">LogOut</button>
+</header>
+
+<div class="container">
+<div class="tab-buttons">
+<button class="active" onclick="showForm('login')">Login</button>
+<button onclick="showForm('register')">Register</button>
+</div>
+
+<form id="login-form" class="active">
+<h2>Login</h2>
+<input type="text" id="login-username" placeholder="Username" required />
+<input type="password" id="login-password" placeholder="Password" required />
+<label class="show-pass"><input type="checkbox" onclick="toggleLoginPass()"> Show Password</label>
+<button type="submit" class="submit-btn">Login</button>
+</form>
+
+<form id="register-form">
+<h2>Register</h2>
+<input type="text" id="register-username" placeholder="Username" required />
+<input type="password" id="register-password" placeholder="Password" required />
+<label class="show-pass"><input type="checkbox" onclick="toggleRegisterPass()"> Show Password</label>
+<input type="email" id="register-email" placeholder="Email" required />
+<button type="button" class="submit-btn" onclick="sendOTP()">Send OTP</button>
+
+<input type="text" id="otp-input" placeholder="Enter OTP" style="display:none;" />
+<p id="otp-timer" style="color:red; display:none;"></p>
+
+<button type="button" class="submit-btn" id="verify-btn" onclick="verifyOTP()" style="display:none;">
+Verify OTP
+</button>
+
+<button type="button" class="submit-btn" id="resend-btn" onclick="sendOTP()" style="display:none;">
+Resend OTP
+</button>
+<br></br>
+<button type="submit" class="submit-btn">Register</button>
+</form>
+
+<div class="continue">
+<a href="scan.html" id="continue-link" class="continue-btn">Continue to Scanner</a>
+</div>
+</div>
+<script>
+const API = "http://localhost:5000";
+
+// OTP functions
+
+let otpVerified = false;
+let timer;
+let timeLeft = 60;
+
+async function sendOTP() {
+    const email = document.getElementById("register-email").value.trim();
+
+    if (!email) {
+        alert("Enter email first");
+        return;
+    }
+
+    const res = await fetch(`${API}/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        alert("OTP sent to your email!");
+
+        document.getElementById("otp-input").style.display = "block";
+        document.getElementById("verify-btn").style.display = "block";
+        document.getElementById("otp-timer").style.display = "block";
+
+        startTimer();
+    } else {
+        alert(data.message);
+    }
+}
+
+function startTimer() {
+    timeLeft = 60;
+    document.getElementById("resend-btn").style.display = "none";
+
+    timer = setInterval(() => {
+        document.getElementById("otp-timer").innerText =
+            `OTP expires in ${timeLeft}s`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(timer);
+            document.getElementById("otp-timer").innerText = "OTP expired";
+            document.getElementById("resend-btn").style.display = "block";
+        }
+    }, 1000);
+}
+
+async function verifyOTP() {
+    const email = document.getElementById("register-email").value.trim();
+    const otp = document.getElementById("otp-input").value.trim();
+
+    const res = await fetch(`${API}/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+        otpVerified = true;
+        clearInterval(timer);
+        alert("OTP verified successfully!");
+    } else {
+        alert(data.message);
+    }
+}
+
+
+/* ---------- UI TOGGLES ---------- */
+function showForm(form){
+    const loginBtn=document.querySelectorAll('.tab-buttons button')[0];
+    const registerBtn=document.querySelectorAll('.tab-buttons button')[1];
+    const loginForm=document.getElementById('login-form');
+    const registerForm=document.getElementById('register-form');
+    if(form==='login'){
+        loginBtn.classList.add('active');
+        registerBtn.classList.remove('active');
+        loginForm.classList.add('active');
+        registerForm.classList.remove('active');
+    } else {
+        registerBtn.classList.add('active');
+        loginBtn.classList.remove('active');
+        registerForm.classList.add('active');
+        loginForm.classList.remove('active');
+    }
+}
+
+function toggleLoginPass(){
+    const f = document.getElementById('login-password');
+    f.type = f.type === 'password' ? 'text' : 'password';
+}
+function toggleRegisterPass(){
+    const f = document.getElementById('register-password');
+    f.type = f.type === 'password' ? 'text' : 'password';
+}
+
+/* ---------- REGISTER ---------- */
+document.getElementById('register-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    const username=document.getElementById('register-username').value.trim();
+    const email=document.getElementById('register-email').value.trim();
+    const password=document.getElementById('register-password').value.trim();
+
+    if(!username || !email || !password){
+        alert('Please fill all fields.');
+        return;
+    }
+if (!otpVerified) {
+    alert("Please verify OTP first");
+    return;
+}
+
+    try{
+        const res = await fetch(`${API}/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json();
+
+        if(data.success){
+            sessionStorage.setItem('loggedIn', 'true'); 
+ 	    sessionStorage.setItem('userId', data.user._id);
+ 	    sessionStorage.setItem('username', data.user.username);
+ 	   alert('Registered successfully!');
+ 	   window.location.href='scan.html';
+        } else {
+            alert(data.message || 'Registration failed');
+        }
+    }catch(err){
+        alert('Error: ' + err.message);
+    }
+});
+
+/* ---------- LOGIN ---------- */
+document.getElementById('login-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+
+// 🔒 BLOCK MULTIPLE LOGIN
+    if (sessionStorage.getItem('loggedIn') === 'true') {
+        alert("You are already logged in. Please logout first.");
+        return;
+    }
+
+    const username=document.getElementById('login-username').value.trim();
+    const password=document.getElementById('login-password').value.trim();
+
+    if(!username || !password){
+        alert('Enter username and password');
+        return;
+    }
+
+    try{
+        const res = await fetch(`${API}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if(data.success){
+	    sessionStorage.setItem('loggedIn', 'true'); 
+            sessionStorage.setItem('userId', data.user._id);
+            sessionStorage.setItem('username', data.user.username);
+            alert('Logged in successfully!');
+            window.location.href='scan.html';
+        } else {
+            alert(data.message || 'Invalid credentials');
+        }
+    }catch(err){
+        alert('Error: ' + err.message);
+    }
+});
+
+/* ---------- LOGOUT ---------- */
+function logout() {
+    if (confirm("Do you want to logout?")) {
+        sessionStorage.clear();
+        alert("Logged out successfully!");
+        window.location.href = "index.html";
+    }
+}
+
+// Hide logout button if not logged in
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (sessionStorage.getItem("loggedIn") !== "true") {
+    logoutBtn.style.display = "none";
+}
+
+
+
+</script>
+</body>
+</html>
