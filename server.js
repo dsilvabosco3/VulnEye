@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 const nodemailer = require("nodemailer");
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "public")));
 
 // ================================
 // URL SCANNER DETECTION DATA
