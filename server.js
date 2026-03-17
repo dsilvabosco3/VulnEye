@@ -72,11 +72,6 @@ const DocumentScan = require("./models/documentScan");
 const VideoScan = require("./models/videoScan");
 const Report = require("./models/report");
 
-/* -----------------------------
-   SIMPLE ROUTES
------------------------------ */
-app.get("/", (req, res) => res.json({ ok: true, message: "VulnEye API" }));
-
 /* ---------- USER ---------- */
 // register
 app.post("/register", async (req, res) => {
@@ -572,5 +567,6 @@ app.get("/api/video-scans", async (req, res) => {
 
 
 /* Start server */
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
