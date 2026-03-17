@@ -118,29 +118,25 @@ app.post("/send-otp", async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.json({ success: false, message: "Email required" });
-    }
+    console.log("ENV USER:", process.env.EMAIL_USER);
+    console.log("Sending OTP to:", email);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    otpStore[email] = {
-      otp,
-      expires: Date.now() + 60000
-    };
-
-    await transporter.sendMail({
-      from: "Vulnerability Scanner <yourgmail@gmail.com>",
+    const info = await transporter.sendMail({
+      from: `"VulnEye" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Your OTP Code",
-      text: `Your OTP is ${otp}. It is valid for 1 minute.`
+      text: `Your OTP is ${otp}`
     });
+
+    console.log("MAIL RESPONSE:", info);
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
-    res.json({ success: false, message: "Failed to send OTP" });
+    console.error("SEND ERROR:", err);
+    res.json({ success: false, error: err.message });
   }
 });
 
