@@ -1,14 +1,12 @@
-module.exports = (conn) => {
-  const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-  const imageScanSchema = new mongoose.Schema({
-    target: String,
-    type: String,
-    severity: String,
-    userId: String,
-    username: String,
-    timestamp: { type: Date, default: Date.now }
-  });
+const imageScanSchema = new mongoose.Schema({
+  target: String,
+  type: String,
+  severity: String,
+  userId: String,
+  username: String,
+  timestamp: { type: Date, default: Date.now }
+});
 
-  return conn.model("ImageScan", imageScanSchema, "imagescans");
-};
+module.exports = mongoose.model("ImageScan", imageScanSchema);
