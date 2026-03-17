@@ -71,11 +71,13 @@ transporter.verify(function (error, success) {
    MONGO CONNECTIONS (3 DBs)
    Using local MongoDB (Option A)
 ----------------------------- */
-console.log("URI CHECK:", process.env.MONGO_URI);
+const mongoURI = process.env.MONGO_URI;
 
-mongoose.connect(process.env.MONGO_URI.trim())
+console.log("RAW URI:", JSON.stringify(mongoURI));
+
+mongoose.connect(mongoURI.trim())
   .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log(err));
+  .catch(err => console.log("MONGO ERROR:", err));
 
 /* Import models (factory functions) */
 const User = require("./models/user");
