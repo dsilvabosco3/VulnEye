@@ -60,30 +60,17 @@ const transporter = nodemailer.createTransport({
    MONGO CONNECTIONS (3 DBs)
    Using local MongoDB (Option A)
 ----------------------------- */
-const mongoURL = "mongodb://mongo:eeiEwCaFawyTeHUNdMPCEiZwxUlYtmGt@mongodb.railway.internal:27017";
-
-const userDB = mongoose.createConnection(mongoURL + "/userDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
-const scanDB = mongoose.createConnection(mongoURL + "/scanDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
-const reportDB = mongoose.createConnection(mongoURL + "/reportDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log(err));
 
 /* Import models (factory functions) */
-const User = require("./models/user")(userDB);
-const UrlScan = require("./models/urlScan")(scanDB);
-const ImageScan = require("./models/imageScan")(scanDB);
-const DocumentScan = require("./models/documentScan")(scanDB);
-const VideoScan = require("./models/videoScan")(scanDB);
-const Report = require("./models/report")(reportDB);
+const User = require("./models/user");
+const UrlScan = require("./models/urlScan");
+const ImageScan = require("./models/imageScan");
+const DocumentScan = require("./models/documentScan");
+const VideoScan = require("./models/videoScan");
+const Report = require("./models/report");
 
 /* -----------------------------
    SIMPLE ROUTES
