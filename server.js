@@ -63,7 +63,7 @@ const transporter = nodemailer.createTransport({
 ----------------------------- */
 const mongoURI = process.env.MONGO_URI;
 
-console.log("ENV CHECK:", mongoURI);
+console.log(mongoURI);
 
 mongoose.connect(mongoURI)
   .then(() => console.log("MongoDB connected"))
