@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -61,7 +62,9 @@ const transporter = nodemailer.createTransport({
    Using local MongoDB (Option A)
 ----------------------------- */
 const mongoURI = process.env.MONGO_URI;
-console.log("MONGO_URI:", mongoURI);
+
+console.log("ENV CHECK:", mongoURI);
+
 mongoose.connect(mongoURI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
