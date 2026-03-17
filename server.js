@@ -60,8 +60,9 @@ const transporter = nodemailer.createTransport({
    MONGO CONNECTIONS (3 DBs)
    Using local MongoDB (Option A)
 ----------------------------- */
-console.log("MONGO_URI:", process.env.MONGO_URI);
-mongoose.connect(process.env.MONGO_URI)
+const mongoURI = process.env.MONGO_URI;
+console.log("MONGO_URI:", mongoURI);
+mongoose.connect(mongoURI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
 
