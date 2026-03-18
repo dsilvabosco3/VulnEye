@@ -331,33 +331,36 @@ nav { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
   font-weight: 600;
   transition: all 0.25s ease;
 }
-/* 🔥 FIX FOR DARK MODE */
+
+/* DARK MODE FIX */
 body.dark .report-btn {
   border: 1px solid rgba(255,255,255,0.15);
   background: #111827;
 }
-.report-btn:hover{
+
+/* HOVER (LIGHT MODE) */
+.report-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 25px rgba(15,23,42,0.12);
-  background:var(--accent);
-  color:white;
+  background: var(--accent);
+  color: white;
 }
 
-.report-btn.primary{
-  background:var(--accent);
-  color:white;
-  border:none;
+/* HOVER FIX FOR DARK MODE */
+body.dark .report-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
 }
 
-.report-btn.primary:hover{
-  background:#1d4ed8;
+.report-btn.primary {
+  background: var(--accent);
+  color: white;
+  border: none;
 }
 
-.report-btn-container{
-  margin-top:18px;
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
+.report-btn.primary:hover {
+  background: #1d4ed8;
 }
 
 /* Settings cards */
