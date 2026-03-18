@@ -531,7 +531,7 @@ app.delete("/scan/delete/:id", async (req, res) => {
     if (!deleted) {
       return res.json({ success: false, message: "Scan not found" });
     }
-
+await Report.deleteOne({ scanId: id });
     res.json({ success: true });
   } catch (err) {
     console.error("Delete error:", err);
