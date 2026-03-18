@@ -521,7 +521,6 @@ app.delete("/scan/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // try deleting from all scan collections
     const deleted =
       (await UrlScan.findByIdAndDelete(id)) ||
       (await ImageScan.findByIdAndDelete(id)) ||
@@ -531,8 +530,16 @@ app.delete("/scan/delete/:id", async (req, res) => {
     if (!deleted) {
       return res.json({ success: false, message: "Scan not found" });
     }
-await Report.deleteOne({ scanId: id });
+
+    await Report.deleteMany({
+      $or: [
+        { scanId: id },
+        { scanId: new mongoose.Types.ObjectId(id) }
+      ]
+    });
+
     res.json({ success: true });
+
   } catch (err) {
     console.error("Delete error:", err);
     res.status(500).json({ success: false });
