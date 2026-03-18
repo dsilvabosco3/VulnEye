@@ -320,7 +320,7 @@ severity = autoSeverity;
 
     await Report.create({
       scanType: type,
-      scanId: doc._id,
+      scanId: doc._id.toString(),
       reportData: {
         userId,
         username,
@@ -374,7 +374,7 @@ app.post("/scan/image", async (req, res) => {
 
     await Report.create({
       scanType: type,
-      scanId: doc._id,
+      scanId: doc._id.toString(),
       reportData: {
         userId,
         username,
@@ -428,7 +428,7 @@ app.post("/scan/document", async (req, res) => {
 
     await Report.create({
       scanType: type,
-      scanId: doc._id,
+      scanId: doc._id.toString(),
       reportData: {
         userId,
         username,
@@ -480,7 +480,7 @@ app.post("/scan/video", async (req, res) => {
 
     await Report.create({
       scanType: type,
-      scanId: doc._id,
+      scanId: doc._id.toString(),
       reportData: {
         userId,
         username,
