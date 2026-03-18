@@ -3,8 +3,13 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 const nodemailer = require("nodemailer");
+
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "public")));
+
 app.get("/", (req, res) => {
-  res.send("VulnEye backend is running 🚀");
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 // ================================
 // URL SCANNER DETECTION DATA
