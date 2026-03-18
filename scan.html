@@ -1223,7 +1223,7 @@ accept=".pdf,.doc,.docx,.docm,.xls,.xlsx,.xlsm,.ppt,.pptx,.txt,.rtf,.odt,.csv,.j
 </div>
 
 <script>
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://vulneye.onrender.com";
 
 /* Chart instances (global) */
 let severityChartInstance = null;
@@ -2074,7 +2074,7 @@ async function deleteScan(id){
   if(!confirm("Delete this scan permanently?")) return;
 
   try{
-    const res = await fetch("http://localhost:5000/scan/delete/" + id, {
+    const res = await fetch(API_BASE + "/scan/delete/" + id, {
       method: "DELETE"
     });
 
@@ -2109,7 +2109,7 @@ async function updateAccount(){
   const userId = sessionStorage.getItem("userId");
 
   try {
-    const res = await fetch(`http://localhost:5000/user/update/${userId}`, {
+    const res = await fetch(`${API_BASE}/user/update/${userId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
