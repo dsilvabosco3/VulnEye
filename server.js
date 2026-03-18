@@ -1,16 +1,8 @@
-require("dns").setDefaultResultOrder("ipv4first");
-require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 const nodemailer = require("nodemailer");
-const path = require("path");
-
-app.use(express.static(__dirname));
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
 
 // ================================
 // URL SCANNER DETECTION DATA
@@ -46,28 +38,15 @@ const suspiciousKeywords = [
 // Temporary OTP storage
 const otpStore = {}; 
 
-
 app.use(cors());
 app.use(express.json());
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
-transporter.verify(function (error, success) {
-  if (error) {
-    console.error("SMTP ERROR:", error);
-  } else {
-    console.log("SMTP READY");
-  }
+  service: "gmail",
+auth: {
+  user: process.env.EMAIL_USER,
+  pass: process.env.EMAIL_PASS
+}
 });
 
 /* -----------------------------
@@ -76,19 +55,28 @@ transporter.verify(function (error, success) {
 ----------------------------- */
 const mongoURI = process.env.MONGO_URI;
 
-console.log("RAW URI:", JSON.stringify(mongoURI));
+const userDB = mongoose.createConnection(mongoURI + "userDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
-mongoose.connect(mongoURI.trim())
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log("MONGO ERROR:", err));
+const scanDB = mongoose.createConnection(mongoURI + "scanDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
+const reportDB = mongoose.createConnection(mongoURI + "reportDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 /* Import models (factory functions) */
-const User = require("./models/user");
-const UrlScan = require("./models/urlScan");
-const ImageScan = require("./models/imageScan");
-const DocumentScan = require("./models/documentScan");
-const VideoScan = require("./models/videoScan");
-const Report = require("./models/report");
+const User = require("./models/user")(userDB);
+const UrlScan = require("./models/urlScan")(scanDB);
+const ImageScan = require("./models/imageScan")(scanDB);
+const DocumentScan = require("./models/documentScan")(scanDB);
+const VideoScan = require("./models/videoScan")(scanDB);
+const Report = require("./models/report")(reportDB);
+
 
 /* ---------- USER ---------- */
 // register
@@ -121,25 +109,29 @@ app.post("/send-otp", async (req, res) => {
   try {
     const { email } = req.body;
 
-    console.log("ENV USER:", process.env.EMAIL_USER);
-    console.log("Sending OTP to:", email);
+    if (!email) {
+      return res.json({ success: false, message: "Email required" });
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const info = await transporter.sendMail({
-      from: `"VulnEye" <${process.env.EMAIL_USER}>`,
+    otpStore[email] = {
+      otp,
+      expires: Date.now() + 60000
+    };
+
+    await transporter.sendMail({
+      from: "Vulnerability Scanner <yourgmail@gmail.com>",
       to: email,
       subject: "Your OTP Code",
-      text: `Your OTP is ${otp}`
+      text: `Your OTP is ${otp}. It is valid for 1 minute.`
     });
-
-    console.log("MAIL RESPONSE:", info);
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error("SEND ERROR:", err);
-    res.json({ success: false, error: err.message });
+    console.error(err);
+    res.json({ success: false, message: "Failed to send OTP" });
   }
 });
 
@@ -581,13 +573,5 @@ app.get("/api/video-scans", async (req, res) => {
 
 
 /* Start server */
-const PORT = process.env.PORT || 8080;
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
-});
-
-// health check (keep server alive)
-app.get("/health", (req, res) => {
-  res.send("OK");
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
