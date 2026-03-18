@@ -1,5 +1,4 @@
 const express = require("express");
-const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
@@ -48,13 +47,8 @@ const otpStore = {};
 
 app.use(cors());
 app.use(express.json());
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* -----------------------------
    MONGO CONNECTIONS (3 DBs)
@@ -127,25 +121,27 @@ app.post("/send-otp", async (req, res) => {
       expires: Date.now() + 60000
     };
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const response = await resend.emails.send({
+      from: "onboarding@resend.dev",
       to: email,
       subject: "Your OTP Code",
       text: `Your OTP is ${otp}. It is valid for 1 minute.`
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
+    console.log("EMAIL RESPONSE:", response);
 
-    console.log("OTP SENT:", email);
+    if (response.error) {
+      console.log("RESEND ERROR:", response.error);
+      return res.json({ success: false, message: "Email failed to send" });
+    }
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error("MAIL ERROR:", err);
-    res.json({ success: false, message: "Email failed to send" });
+    console.error("OTP ERROR FULL:", err);
+    res.json({ success: false, message: "Failed to send OTP" });
   }
 });
-
 //verify otp
 app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
