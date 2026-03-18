@@ -1,10 +1,12 @@
-const mongoose = require("mongoose");
+module.exports = (conn) => {
+  const mongoose = require("mongoose");
 
-const reportSchema = new mongoose.Schema({
-  scanType: String,
-  scanId: String,
-  reportData: Object,
-  createdAt: { type: Date, default: Date.now }
-});
+  const reportSchema = new mongoose.Schema({
+    scanType: String,
+    scanId: String,
+    reportData: Object,
+    createdAt: { type: Date, default: Date.now }
+  });
 
-module.exports = mongoose.model("Report", reportSchema);
+  return conn.model("Report", reportSchema, "reports");
+};
