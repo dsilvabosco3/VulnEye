@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
-const nodemailer = require("nodemailer");
+
 
 const path = require("path");
 
@@ -47,14 +47,8 @@ const otpStore = {};
 
 app.use(cors());
 app.use(express.json());
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* -----------------------------
    MONGO CONNECTIONS (3 DBs)
@@ -127,21 +121,20 @@ app.post("/send-otp", async (req, res) => {
       expires: Date.now() + 60000
     };
 
-    await transporter.sendMail({
-      from: "Vulnerability Scanner <yourgmail@gmail.com>",
+    await resend.emails.send({
+      from: "dsilvabosco3@gmail.com",
       to: email,
-      subject: "Your OTP Code",
+      subject: "re_bBGA2g3W_P3qAPyqfJEm1QHS76fxXn1KR",
       text: `Your OTP is ${otp}. It is valid for 1 minute.`
     });
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
+    console.error("OTP ERROR:", err);
     res.json({ success: false, message: "Failed to send OTP" });
   }
 });
-
 //verify otp
 app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
