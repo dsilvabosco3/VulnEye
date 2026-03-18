@@ -121,12 +121,12 @@ app.post("/send-otp", async (req, res) => {
       expires: Date.now() + 60000
     };
 
-    await resend.emails.send({
-      from: "dsilvabosco3@gmail.com",
-      to: email,
-      subject: "re_bBGA2g3W_P3qAPyqfJEm1QHS76fxXn1KR",
-      text: `Your OTP is ${otp}. It is valid for 1 minute.`
-    });
+await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: email,
+  subject: "Your OTP Code",
+  text: `Your OTP is ${otp}. It is valid for 1 minute.`
+});
 
     res.json({ success: true });
 
