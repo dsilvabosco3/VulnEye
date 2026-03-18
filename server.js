@@ -43,29 +43,29 @@ app.use(express.json());
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
-auth: {
-  user: process.env.EMAIL_USER,
-  pass: process.env.EMAIL_PASS
-}
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
 });
 
 /* -----------------------------
    MONGO CONNECTIONS (3 DBs)
    Using local MongoDB (Option A)
 ----------------------------- */
-const mongoURI = process.env.MONGO_URI;
+const baseURI = process.env.MONGO_URI;
 
-const userDB = mongoose.createConnection(mongoURI + "userDB", {
+const userDB = mongoose.createConnection(baseURI + "userDB", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
-const scanDB = mongoose.createConnection(mongoURI + "scanDB", {
+const scanDB = mongoose.createConnection(baseURI + "scanDB", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
-const reportDB = mongoose.createConnection(mongoURI + "reportDB", {
+const reportDB = mongoose.createConnection(baseURI + "reportDB", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
