@@ -121,17 +121,24 @@ app.post("/send-otp", async (req, res) => {
       expires: Date.now() + 60000
     };
 
-await resend.emails.send({
-  from: "onboarding@resend.dev",
-  to: email,
-  subject: "Your OTP Code",
-  text: `Your OTP is ${otp}. It is valid for 1 minute.`
-});
+    const response = await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}. It is valid for 1 minute.`
+    });
+
+    console.log("EMAIL RESPONSE:", response);
+
+    if (response.error) {
+      console.log("RESEND ERROR:", response.error);
+      return res.json({ success: false, message: "Email failed to send" });
+    }
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error("OTP ERROR:", err);
+    console.error("OTP ERROR FULL:", err);
     res.json({ success: false, message: "Failed to send OTP" });
   }
 });
