@@ -441,12 +441,12 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const password=document.getElementById('login-password').value.trim();
 
 if (!validateUsername(username)) {
-    alert("Username must be 3-15 characters and include both letters and numbers");
+    alert("Invalid Username");
     return;
 }
 
 if (!validatePassword(password)) {
-    alert("Password must be at least 6 characters (letters or numbers)");
+    alert("Invalid Password");
     return;
 }
 
