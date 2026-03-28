@@ -381,7 +381,11 @@ if (
 if (name.match(/\.(jpg|png|gif)\.exe/)) {
   riskScore += 5;
 }
-
+// ensure LOW if some mild suspicious pattern
+if (riskScore === 0 && name.includes("_")) {
+  riskScore = 1;
+}
+    
     let severity = "Safe";
 
     if (riskScore === 0) severity = "Safe";
@@ -459,6 +463,10 @@ if (
 // Dangerous extension
 if (name.endsWith(".exe") || name.match(/\.(pdf|docx)\.exe/)) {
   riskScore += 5;
+}
+// ensure LOW if some mild suspicious pattern
+if (riskScore === 0 && name.includes("_")) {
+  riskScore = 1;
 }
 
     let severity = "Safe";
@@ -538,7 +546,10 @@ if (
 if (name.match(/\.(mp4|avi|mkv)\.exe/)) {
   riskScore += 5;
 }
-
+// ensure LOW if some mild suspicious pattern
+if (riskScore === 0 && name.includes("_")) {
+  riskScore = 1;
+}
     let severity = "Safe";
 
     if (riskScore === 0) severity = "Safe";
