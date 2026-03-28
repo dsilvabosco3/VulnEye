@@ -441,7 +441,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const password=document.getElementById('login-password').value.trim();
 
 if (!validateUsername(username)) {
-    alert("Invalid username format");
+    alert("Username must be 3-15 characters and include both letters and numbers");
     return;
 }
 
