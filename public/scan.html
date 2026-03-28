@@ -1243,24 +1243,20 @@ let typeChartInstance = null;
    Persistence & App State
    (sessionStorage used for login state only)
 -------------------------*/
-let historyData = [];
+let historyData = []; // loaded from backend
 
 function setTheme(mode){
   if(mode === 'dark'){
     document.body.classList.add('dark');
-    localStorage.setItem('theme','dark');
+    sessionStorage.setItem('theme','dark');
   } else {
     document.body.classList.remove('dark');
-    localStorage.setItem('theme','light');
+    sessionStorage.setItem('theme','light');
   }
 }
-
-// APPLY THEME (ONLY FOR SCAN PAGE)
-window.onload = function () {
-  if(localStorage.getItem('theme') === 'dark'){
-    document.body.classList.add('dark');
-  }
-};
+if(sessionStorage.getItem('theme') === 'dark'){
+  document.body.classList.add('dark');
+}
 
 /* Login check */
 if(sessionStorage.getItem('loggedIn') !== 'true'){
@@ -2220,14 +2216,6 @@ renderReports();
 renderCharts();
 setSection('overview');
 document.addEventListener("DOMContentLoaded", loadHistoryFromDB);
-	
-	window.onload = function () {
-  const theme = localStorage.getItem("theme");
-
-  if (theme === "dark") {
-    document.body.classList.add("dark-mode");
-  }
-};
 </script>
 </body>
 </html>
