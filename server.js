@@ -348,12 +348,39 @@ app.post("/scan/image", async (req, res) => {
     const name = target.toLowerCase();
 
     // Suspicious image patterns
-    if (name.includes("virus")) riskScore += 4;
-    if (name.includes("malware")) riskScore += 4;
-    if (name.includes("hack")) riskScore += 3;
+    // LOW
+if (
+  name.includes("update") ||
+  name.includes("login") ||
+  name.includes("secure")
+) {
+  riskScore += 1;
+}
 
-    // Fake image trick
-    if (name.match(/\.(jpg|png|gif)\.exe/)) riskScore += 5;
+// MEDIUM
+if (
+  name.includes("hack") ||
+  name.includes("verify") ||
+  name.includes("account")
+) {
+  riskScore += 3;
+}
+
+// HIGH
+if (
+  name.includes("virus") ||
+  name.includes("malware") ||
+  name.includes("trojan") ||
+  name.includes("free") ||
+  name.includes("prize")
+) {
+  riskScore += 5;
+}
+
+// Fake image trick
+if (name.match(/\.(jpg|png|gif)\.exe/)) {
+  riskScore += 5;
+}
 
     let severity = "Safe";
 
@@ -400,14 +427,39 @@ app.post("/scan/document", async (req, res) => {
     const name = target.toLowerCase();
 
     // Suspicious document keywords
-    if (name.includes("invoice")) riskScore += 1;
-    if (name.includes("bank")) riskScore += 2;
-    if (name.includes("password")) riskScore += 3;
-    if (name.includes("crypto")) riskScore += 3;
+    // LOW
+if (
+  name.includes("update") ||
+  name.includes("login") ||
+  name.includes("invoice")
+) {
+  riskScore += 1;
+}
 
-    // Dangerous extensions
-    if (name.endsWith(".exe")) riskScore += 5;
-    if (name.match(/\.(pdf|docx)\.exe/)) riskScore += 5;
+// MEDIUM
+if (
+  name.includes("verify") ||
+  name.includes("account") ||
+  name.includes("bank")
+) {
+  riskScore += 3;
+}
+
+// HIGH
+if (
+  name.includes("password") ||
+  name.includes("crypto") ||
+  name.includes("free") ||
+  name.includes("prize") ||
+  name.includes("lottery")
+) {
+  riskScore += 5;
+}
+
+// Dangerous extension
+if (name.endsWith(".exe") || name.match(/\.(pdf|docx)\.exe/)) {
+  riskScore += 5;
+}
 
     let severity = "Safe";
 
@@ -454,12 +506,38 @@ app.post("/scan/video", async (req, res) => {
     const name = target.toLowerCase();
 
     // Suspicious video patterns
-    if (name.includes("free")) riskScore += 1;
-    if (name.includes("crack")) riskScore += 3;
-    if (name.includes("hack")) riskScore += 3;
+    // LOW
+if (
+  name.includes("update") ||
+  name.includes("free")
+) {
+  riskScore += 1;
+}
 
-    // Fake video trick
-    if (name.match(/\.(mp4|avi|mkv)\.exe/)) riskScore += 5;
+// MEDIUM
+if (
+  name.includes("hack") ||
+  name.includes("crack") ||
+  name.includes("verify")
+) {
+  riskScore += 3;
+}
+
+// HIGH
+if (
+  name.includes("virus") ||
+  name.includes("malware") ||
+  name.includes("trojan") ||
+  name.includes("crypto") ||
+  name.includes("prize")
+) {
+  riskScore += 5;
+}
+
+// Fake video trick
+if (name.match(/\.(mp4|avi|mkv)\.exe/)) {
+  riskScore += 5;
+}
 
     let severity = "Safe";
 
