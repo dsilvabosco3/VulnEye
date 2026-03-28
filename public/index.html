@@ -268,7 +268,7 @@ Resend OTP
 </div>
 <script>
 const API = "https://vulneye.onrender.com";
-
+	
 // OTP functions
 
 let otpVerified = false;
@@ -342,7 +342,14 @@ async function verifyOTP() {
     }
 }
 
+function validateUsername(username) {
+    return /^[a-zA-Z0-9]{3,15}$/.test(username);
+}
 
+function validatePassword(password) {
+    return password.length >= 6;
+}
+	
 /* ---------- UI TOGGLES ---------- */
 function showForm(form){
     const loginBtn=document.querySelectorAll('.tab-buttons button')[0];
@@ -379,10 +386,20 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const email=document.getElementById('register-email').value.trim();
     const password=document.getElementById('register-password').value.trim();
 
-    if(!username || !email || !password){
-        alert('Please fill all fields.');
-        return;
-    }
+if (!validateUsername(username)) {
+    alert("Username must be 3-15 characters (letters & numbers only)");
+    return;
+}
+
+if (!email) {
+    alert("Email is required");
+    return;
+}
+
+if (!validatePassword(password)) {
+    alert("Password must be at least 6 characters (letters or numbers)");
+    return;
+}
 if (!otpVerified) {
     alert("Please verify OTP first");
     return;
@@ -423,10 +440,15 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const username=document.getElementById('login-username').value.trim();
     const password=document.getElementById('login-password').value.trim();
 
-    if(!username || !password){
-        alert('Enter username and password');
-        return;
-    }
+if (!validateUsername(username)) {
+    alert("Invalid username format");
+    return;
+}
+
+if (!validatePassword(password)) {
+    alert("Password must be at least 6 characters (letters or numbers)");
+    return;
+}
 
     try{
         const res = await fetch(`${API}/login`, {
