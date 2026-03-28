@@ -343,7 +343,7 @@ async function verifyOTP() {
 }
 
 function validateUsername(username) {
-    return /^[a-zA-Z0-9]{3,15}$/.test(username);
+    return /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]{3,15}$/.test(username);
 }
 
 function validatePassword(password) {
@@ -387,7 +387,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const password=document.getElementById('register-password').value.trim();
 
 if (!validateUsername(username)) {
-    alert("Username must be 3-15 characters (letters & numbers only)");
+    alert("Username must be 3-15 characters and include both letters and numbers");
     return;
 }
 
